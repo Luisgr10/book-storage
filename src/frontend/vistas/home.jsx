@@ -1,55 +1,37 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Importa la función signInWithEmailAndPassword desde firebase/auth
-import appFirebase from '../../../firebaseConfig'; // Importa la configuración de Firebase
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import appFirebase from '../../../firebaseConfig';
 
-const auth = getAuth(appFirebase); // Obtiene la instancia de autenticación usando la configuración de Firebase
+const auth = getAuth(appFirebase);
 
 const HomeScreen = ({ navigation }) => {
+    const [isSignedIn, setIsSignedIn] = useState(false);
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsSignedIn(!!user);
+        });
 
-    const LogIn = async () => {
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            Alert.alert('Iniciando sesión', 'Accediendo...');
-            navigation.navigate('Perfil'); // Navega a la pantalla 'Perfil' después de iniciar sesión
-        } catch (error) {
-            console.error('Error al iniciar sesión:', error);
-            Alert.alert('Error', 'Hubo un problema al iniciar sesión. Verifica tus credenciales y vuelve a intentarlo.');
-        }
-    }
+        return () => unsubscribe();
+    }, []);
 
     return (
         <View style={styles.container}>
-            <View>
+            <View style={styles.header}>
+                <Text style={styles.title}>Book Storage</Text>
                 <Image source={require('../../../assets/BookProfile.jpg')} style={styles.profile} />
             </View>
 
-            <View style={styles.form}>
-                <View style={styles.formText}>
-                    <TextInput
-                        placeholder='correo@email.com'
-                        style={{ paddingHorizontal: 15 }}
-                        onChangeText={(text) => setEmail(text)}
-                        value={email} // Asegúrate de vincular el valor del campo al estado 'email'
-                    />
-                </View>
-                <View style={styles.formText}>
-                    <TextInput
-                        placeholder='Contraseña'
-                        style={{ paddingHorizontal: 15 }}
-                        onChangeText={(text) => setPassword(text)}
-                        secureTextEntry={true} // Para ocultar la contraseña
-                        value={password} // Vincula el valor del campo al estado 'password'
-                    />
-                </View>
-                <View style={styles.formButton}>
-                    <TouchableOpacity style={styles.btn} onPress={LogIn}>
-                        <Text style={styles.btnText}>Iniciar Sesión</Text>
+            <View style={styles.content}>
+                <Text style={styles.description}>
+                    Bienvenido a Book Storage, tu app de almacenamiento de libros. Aquí puedes organizar tu colección personal de libros, acceder a información detallada y mucho más.
+                </Text>
+                {!isSignedIn && (
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Registro')}>
+                        <Text style={styles.buttonText}>Regístrate</Text>
                     </TouchableOpacity>
-                </View>
+                )}
             </View>
         </View>
     );
@@ -60,52 +42,48 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#ffffff', // Asegúrate de establecer un color de fondo si es necesario
+        backgroundColor: '#ffffff',
+        padding: 20,
+    },
+    header: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
     },
     profile: {
         height: 100,
         width: 100,
         borderRadius: 50,
     },
-    form: {
-        margin: 30,
-        padding: 20,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        width: '90%',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    formText: {
-        paddingVertical: 10,
-        backgroundColor: '#cccccc40',
-        borderRadius: 30,
-        marginVertical: 10,
-    },
-    formButton: {
+    content: {
         alignItems: 'center',
-        margin: 10
     },
-    btn: {
+    description: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 20,
+        paddingHorizontal: 20,
+    },
+    button: {
         backgroundColor: '#525fe1',
         borderRadius: 30,
         paddingVertical: 15,
-        width: 150,
-        marginTop: 20,
+        paddingHorizontal: 30,
     },
-    btnText: {
-        textAlign: 'center',
+    buttonText: {
         color: 'white',
-    }
+        fontSize: 16,
+    },
 });
 
 export default HomeScreen;
+
 
 
 

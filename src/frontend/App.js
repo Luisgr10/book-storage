@@ -1,50 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import { Entypo, Ionicons, FontAwesome6  } from '@expo/vector-icons';
+import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { Entypo, Ionicons, FontAwesome6 } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import appFirebase from '../../firebaseConfig';
-import  HomeScreen  from './vistas/home';
+import HomeScreen from './vistas/home';
 import Perfil from './vistas/perfil';
 import Biblioteca from './vistas/biblioteca';
+import SignIn from './vistas/signIn';
 
 const auth = getAuth(appFirebase);
 const Tab = createBottomTabNavigator();
-
-const getIsSignedIn = () => {
-  return new Promise((resolve, reject) => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        resolve(true);
-      } else {
-        resolve(false);
-      }
-    }, reject);
-  });
-};
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const signedIn = await getIsSignedIn();
-        setIsSignedIn(signedIn);
-      } catch (error) {
-        console.error('Error al verificar estado de autenticación:', error);
-        setIsSignedIn(false);
-      }
-    };
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsSignedIn(!!user);
+    });
 
-    checkAuthStatus();
+    return () => unsubscribe(); // Cleanup subscription on unmount
   }, []);
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      setIsSignedIn(false); // Actualiza el estado después de cerrar sesión
+      setIsSignedIn(false);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -90,14 +73,14 @@ export default function App() {
         ) : (
           <Tab.Screen
             name="Sign In"
-            component={Perfil} 
+            component={SignIn}
             options={{
               tabBarLabel: 'Sign In',
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="person" size={24} color={color} />
               ),
             }}
-            initialParams={{ onSignOut: handleSignOut }} // Pasar la función de cierre de sesión como prop
+            initialParams={{ onSignOut: handleSignOut }}
           />
         )}
       </Tab.Navigator>
@@ -113,3 +96,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+

@@ -1,15 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Button, StyleSheet } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { getAuth, signOut } from 'firebase/auth';
+import appFirebase from '../../../firebaseConfig';
 
-const Perfil = ({ onSignOut }) => {
-  const route = useRoute();
-  const signOutHandler = route.params?.onSignOut || onSignOut;
+const auth = getAuth(appFirebase);
+
+const Perfil = () => {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button title="Cerrar sesión" onPress={handleSignOut} />
+      ),
+    });
+  }, [navigation]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
       {/* Otros componentes de perfil */}
-      {signOutHandler && <Button title="Cerrar sesión" onPress={signOutHandler} />} {/* Mostrar el botón si la función existe */}
     </View>
   );
 };
@@ -23,4 +42,5 @@ const styles = StyleSheet.create({
 });
 
 export default Perfil;
+
 
