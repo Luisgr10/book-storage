@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Button, StyleSheet } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 
-export const Perfil = ({navigation, route}) => {
+const Perfil = ({ onSignOut }) => {
+  const route = useRoute();
+  const signOutHandler = route.params?.onSignOut || onSignOut;
+
   return (
     <View style={styles.container}>
-      <Text style={styles.subtitle}>Esta es la pantalla de perfil</Text>
-      {/* Aquí podrías agregar más contenido o componentes */}
+      {/* Otros componentes de perfil */}
+      {signOutHandler && <Button title="Cerrar sesión" onPress={signOutHandler} />} {/* Mostrar el botón si la función existe */}
     </View>
   );
 };
@@ -15,17 +19,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff', // Color de fondo blanco
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#333', // Color de texto gris oscuro
   },
 });
 
 export default Perfil;
+
