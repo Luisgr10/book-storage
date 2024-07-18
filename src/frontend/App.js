@@ -9,9 +9,11 @@ import HomeScreen from './vistas/home';
 import Perfil from './vistas/perfil';
 import Biblioteca from './vistas/biblioteca';
 import SignIn from './vistas/signIn';
+import RegisterScreen from './vistas/registro';
 
 const auth = getAuth(appFirebase);
 const Tab = createBottomTabNavigator();
+
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -35,7 +37,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+        <Tab.Navigator>
         <Tab.Screen
           name="Home"
           component={HomeScreen}
@@ -71,17 +73,28 @@ export default function App() {
             />
           </>
         ) : (
-          <Tab.Screen
-            name="Sign In"
-            component={SignIn}
-            options={{
-              tabBarLabel: 'Sign In',
-              tabBarIcon: ({ color, size }) => (
-                <Ionicons name="person" size={24} color={color} />
-              ),
-            }}
-            initialParams={{ onSignOut: handleSignOut }}
-          />
+          <>
+            <Tab.Screen
+              name="Sign In"
+              component={SignIn}
+              options={{
+                tabBarLabel: 'Sign In',
+                tabBarIcon: ({ color, size }) => (
+                  <Ionicons name="person" size={24} color={color} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Registro"
+              component={RegisterScreen}
+              options={{
+                tabBarLabel: 'Registro',
+                tabBarIcon: ({ color, size }) => (
+                  <Ionicons name="person-add" size={24} color={color} />
+                ),
+              }}
+            />
+          </>
         )}
       </Tab.Navigator>
     </NavigationContainer>

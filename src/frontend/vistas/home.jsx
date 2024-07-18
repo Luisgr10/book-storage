@@ -27,11 +27,6 @@ const HomeScreen = ({ navigation }) => {
                 <Text style={styles.description}>
                     Bienvenido a Book Storage, tu app de almacenamiento de libros. Aquí puedes organizar tu colección personal de libros, acceder a información detallada y mucho más.
                 </Text>
-                {!isSignedIn && (
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Registro')}>
-                        <Text style={styles.buttonText}>Regístrate</Text>
-                    </TouchableOpacity>
-                )}
             </View>
         </View>
     );

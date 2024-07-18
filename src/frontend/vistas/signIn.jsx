@@ -21,6 +21,9 @@ const SignIn = ({ onSignOut }) => {
 };
   return (
       <View style={styles.container}>
+        <Image source={require('../../../assets/registroBg.jpg')}
+         style={[styles.backgroundImage, 
+         StyleSheet.absoluteFill]}/>
           <View>
               <Image source={require('../../../assets/BookProfile.jpg')} style={styles.profile} />
           </View>
@@ -28,19 +31,21 @@ const SignIn = ({ onSignOut }) => {
           <View style={styles.form}>
               <View style={styles.formText}>
                   <TextInput
-                      placeholder='correo@email.com'
+                      placeholder='Correo@email.com'
+                      placeholderTextColor="rgba(0, 0, 0, 0.5)"
                       style={{ paddingHorizontal: 15 }}
                       onChangeText={(text) => setEmail(text)}
-                      value={email} // Asegúrate de vincular el valor del campo al estado 'email'
+                      value={email} 
                   />
               </View>
               <View style={styles.formText}>
                   <TextInput
                       placeholder='Contraseña'
+                      placeholderTextColor="rgba(0, 0, 0, 0.5)"
                       style={{ paddingHorizontal: 15 }}
                       onChangeText={(text) => setPassword(text)}
                       secureTextEntry={true} // Para ocultar la contraseña
-                      value={password} // Vincula el valor del campo al estado 'password'
+                      value={password} 
                   />
               </View>
               <View style={styles.formButton}>
@@ -54,6 +59,11 @@ const SignIn = ({ onSignOut }) => {
 };
 
 const styles = StyleSheet.create({
+    backgroundImage: {
+        resizeMode: 'cover', 
+        width: '100%',
+        height: '100%'
+      },
   container: {
       flex: 1,
       justifyContent: 'center',
@@ -83,7 +93,7 @@ const styles = StyleSheet.create({
   formText: {
       paddingVertical: 10,
       backgroundColor: '#cccccc40',
-      borderRadius: 30,
+      borderRadius: 10,
       marginVertical: 10,
   },
   formButton: {
@@ -92,7 +102,7 @@ const styles = StyleSheet.create({
   },
   btn: {
       backgroundColor: '#525fe1',
-      borderRadius: 30,
+      borderRadius: 10,
       paddingVertical: 15,
       width: 150,
       marginTop: 20,
