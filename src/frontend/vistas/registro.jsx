@@ -18,7 +18,11 @@ const RegisterScreen = () => {
         email,
         password
       );
+      
       const user = userCredential.user;
+      
+      // Solo mostramos un mensaje de éxito sin iniciar sesión automáticamente
+      Alert.alert("Registro exitoso!", "Usuario registrado correctamente");
 
       // Guardar datos adicionales en Firestore
       await setDoc(doc(db, "usuarios", user.uid), {
@@ -27,7 +31,6 @@ const RegisterScreen = () => {
         // No almacenes la contraseña aquí por razones de seguridad
       });
 
-      Alert.alert("Registro exitoso!", "Usuario registrado correctamente");
     } catch (error) {
       Alert.alert("Error", error.message);
     }
