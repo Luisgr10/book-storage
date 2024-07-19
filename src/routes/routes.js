@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { db } = require('../backend/firebase.js');
+const { db } = require('../backend/firebase');
 const { isGoogleComputeEngineMACAddress } = require('gcp-metadata');
 
 const router = Router();
