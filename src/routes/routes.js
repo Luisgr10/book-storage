@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { db } = require('../backend/firebase.js');
+const { db } = require('../backend/firebase');
 const { isGoogleComputeEngineMACAddress } = require('gcp-metadata');
 
 const router = Router();
@@ -85,6 +85,31 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar el libro:', error);
         res.status(500).send('Error al eliminar el libro');
+    }
+});
+
+// Ruta para subir múltiples libros
+router.post('/uploadBooks', async (req, res) => {
+    try {
+        const books = req.body;
+
+        if (!Array.isArray(books)) {
+            return res.status(400).send('El cuerpo de la solicitud debe ser un array de libros');
+        }
+
+        const batch = db.batch();
+
+        books.forEach(bookData => {
+            const bookRef = db.collection('Books').doc();
+            batch.set(bookRef, bookData);
+        });
+
+        await batch.commit();
+
+        res.status(201).send('Libros subidos exitosamente');
+    } catch (error) {
+        console.error('Error al subir los libros:', error);
+        res.status(500).send('Error al subir los libros');
     }
 });
 

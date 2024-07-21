@@ -1,11 +1,34 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Button, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { getAuth, signOut } from 'firebase/auth';
+import appFirebase from '../../../firebaseConfig';
 
-export const Perfil = ({navigation, route}) => {
+const auth = getAuth(appFirebase);
+
+const Perfil = () => {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button title="Cerrar sesión" onPress={handleSignOut} />
+      ),
+    });
+  }, [navigation]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.subtitle}>Esta es la pantalla de perfil</Text>
-      {/* Aquí podrías agregar más contenido o componentes */}
+      {/* Otros componentes de perfil */}
     </View>
   );
 };
@@ -15,17 +38,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff', // Color de fondo blanco
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#333', // Color de texto gris oscuro
   },
 });
 
 export default Perfil;
+
+
