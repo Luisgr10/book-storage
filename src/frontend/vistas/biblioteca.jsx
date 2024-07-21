@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, FlatList } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from "../../../firebaseConfig"
 
+
 const Biblioteca = () => {
   const [books, setBooks] = useState([]);
 
@@ -23,8 +24,10 @@ const Biblioteca = () => {
   const renderBook = ({ item }) => (
     <View style={styles.bookContainer}>
       <Image source={{ uri: item.portadaURL }} style={styles.bookImage} />
+      <View style={styles.bookInfo}>
       <Text style={styles.bookTitle}>{item.titulo}</Text>
       <Text style={styles.bookAuthor}>{item.autor.join(', ')}</Text>
+      </View>
     </View>
   );
 
@@ -35,9 +38,7 @@ const Biblioteca = () => {
         data={books}
         renderItem={renderBook}
         keyExtractor={(item, index) => index.toString()}
-        numColumns={2} // Define el número de columnas para la cuadrícula
-        columnWrapperStyle={styles.row} // Estilo para las filas de la cuadrícula
-        contentContainerStyle={styles.list} // Estilo para el contenedor de la lista
+        contentContainerStyle={styles.list}
       />
     </View>
   )
@@ -49,24 +50,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    padding: 10, // Agrega padding al contenedor principal
+    
   },
   subtitle: {
     fontSize: 18,
     color: '#333',
     marginBottom: 20,
   },
-  row: {
-    justifyContent: 'space-between', // Espaciado entre los elementos de la fila
-  },
-  list: {
-    flexGrow: 1, // Asegura que la lista ocupe todo el espacio disponible
-    alignItems: 'center', // Centra los elementos dentro de la lista
-  },
   bookContainer: {
-    flex: 1,
-    margin: 10, // Espaciado entre las celdas
-    alignItems: 'center',
+    flexDirection: 'row', // Organiza los elementos en fila
+    alignItems: 'center', // Alinea verticalmente el contenido
+    marginBottom: 15, // Espacio entre los elementos de la lista
+    padding: 10, // Espaciado interno del contenedor
     borderRadius: 10, // Bordes redondeados
     backgroundColor: '#f8f8f8', // Color de fondo para cada celda
     elevation: 3, // Sombra en Android
@@ -74,6 +69,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    width: '70%',
+    marginHorizontal: 35,
+  },
+  bookInfo: {
+    flexDirection: 'column',
+    flexShrink: 1,
   },
   bookImage: {
     width: 120,
@@ -85,7 +86,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 5,
-    marginHorizontal: 5, // Espaciado horizontal alrededor del título
+    marginHorizontal: 25, 
+    
   },
   bookAuthor: {
     fontSize: 14,

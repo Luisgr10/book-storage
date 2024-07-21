@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Entypo, Ionicons, FontAwesome6 } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import appFirebase from '../../firebaseConfig';
 import HomeScreen from './vistas/home';
 import Perfil from './vistas/perfil';
@@ -36,6 +37,7 @@ export default function App() {
   };
 
   return (
+    <SafeAreaProvider>
     <NavigationContainer>
         <Tab.Navigator>
         <Tab.Screen
@@ -98,6 +100,7 @@ export default function App() {
         )}
       </Tab.Navigator>
     </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
