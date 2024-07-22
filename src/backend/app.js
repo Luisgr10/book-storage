@@ -1,8 +1,12 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors'); 
 const routes = require('../routes/routes'); // Asegúrate de que la ruta es correcta
 
 const app = express();
+
+// Configura CORS para permitir todas las solicitudes
+app.use(cors());
 
 app.use(morgan('dev'));
 

@@ -9,6 +9,7 @@ const auth = getAuth(appFirebase); // Obtiene la instancia de autenticación usa
 const SignIn = ({ onSignOut }) => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+  const navigation = useNavigation();
 
   const LogIn = async () => {
     try {
@@ -53,6 +54,12 @@ const SignIn = ({ onSignOut }) => {
                       <Text style={styles.btnText}>Iniciar Sesión</Text>
                   </TouchableOpacity>
               </View>
+              <View style={styles.registerContainer}>
+        <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('RegisterScreen')}>
+          <Text style={styles.registerLink}>Regístrate aquí</Text>
+        </TouchableOpacity>
+      </View>
           </View>
       </View>
   );
@@ -110,7 +117,20 @@ const styles = StyleSheet.create({
   btnText: {
       textAlign: 'center',
       color: 'white',
-  }
+  },
+  registerContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  registerText: {
+    fontSize: 16,
+    color: '#555',
+  },
+  registerLink: {
+    fontSize: 16,
+    color: '#525fe1',
+    textDecorationLine: 'underline',
+  },
 });
 
 export default SignIn;

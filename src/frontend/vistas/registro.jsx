@@ -1,35 +1,36 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, Alert, StyleSheet, Text, Image, ScrollView } from "react-native";
+import { View, TextInput, TouchableOpacity, Alert, StyleSheet, Text, Image } from "react-native";
 import { auth, db } from "../../../firebaseConfig"; // Asegúrate de importar auth y db
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { BlurView } from 'expo-blur'
+import { useNavigation } from "@react-navigation/native";
 
 const RegisterScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nombre, setNombre] = useState("");
+  const navigation = useNavigation();
 
   const handleSignUp = async () => {
     try {
       // Crear usuario con correo y contraseña
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      
-      const user = userCredential.user;
+      await createUserWithEmailAndPassword(auth, email, password);
       
       // Solo mostramos un mensaje de éxito sin iniciar sesión automáticamente
       Alert.alert("Registro exitoso!", "Usuario registrado correctamente");
 
       // Guardar datos adicionales en Firestore
-      await setDoc(doc(db, "usuarios", user.uid), {
-        nombre: nombre,
-        email: email,
-        // No almacenes la contraseña aquí por razones de seguridad
-      });
+      const user = auth.currentUser; // Obtén el usuario actual después del registro
+      if (user) {
+        await setDoc(doc(db, "usuarios", user.uid), {
+          nombre: nombre,
+          email: email,
+          // No almacenes la contraseña aquí por razones de seguridad
+        });
+      }
+      
+      // Navega a la pantalla de inicio de sesión
+      navigation.navigate('Perfil');
 
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -37,12 +38,8 @@ const RegisterScreen = () => {
   };
 
   return (
-      <View style={styles.container}>
-        <Image source={require('../../../assets/registroBg.jpg')}
-         style={[styles.backgroundImage, 
-         StyleSheet.absoluteFill]}/>
-        
-            
+    <View style={styles.container}>
+      <Image source={require('../../../assets/registroBg.jpg')} style={[styles.backgroundImage, StyleSheet.absoluteFill]} />
       <View style={styles.form}>
         <View style={styles.formText}>
           <TextInput
@@ -73,24 +70,21 @@ const RegisterScreen = () => {
           />
         </View>
         <View style={styles.formButton}>
-                  <TouchableOpacity style={styles.btn} onPress={handleSignUp}>
-                      <Text style={styles.btnText}>Registrar</Text>
-                  </TouchableOpacity>
-              </View>
+          <TouchableOpacity style={styles.btn} onPress={handleSignUp}>
+            <Text style={styles.btnText}>Registrar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-     
-      
     </View>
-   
   );
 };
 
 const styles = StyleSheet.create({
-    backgroundImage: {
-        resizeMode: 'cover', 
-        width: '100%',
-        height: '100%'
-      },
+  backgroundImage: {
+    resizeMode: 'cover', 
+    width: '100%',
+    height: '100%'
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -105,19 +99,18 @@ const styles = StyleSheet.create({
     width: '90%',
     shadowColor: '#000',
     shadowOffset: {
-        width: 0,
-        height: 2,
+      width: 0,
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-},
+  },
   formText: {
     paddingVertical: 10,
     backgroundColor: "#cccccc95",
     borderRadius: 10,
     marginVertical: 10,
-    
   },
   formButton: {
     alignItems: "center",
@@ -137,3 +130,4 @@ const styles = StyleSheet.create({
 });
 
 export default RegisterScreen;
+
