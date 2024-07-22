@@ -1,7 +1,7 @@
 
 # BookStorage
 
-plicación técnica para la gestión de almacenamiento de libros. Este proyecto está compuesto por un frontend desarrollado con Expo y React Native, y un backend construido con Express y Firebase.
+Aplicación técnica para la gestión de almacenamiento de libros. Este proyecto está compuesto por un frontend desarrollado con Expo y React Native, y un backend construido con Express y Firebase.
 
 
 
