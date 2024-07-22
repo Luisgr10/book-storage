@@ -14,9 +14,9 @@ const Perfil = () => {
   const [likedBookDetails, setLikedBookDetails] = useState([]);
   const [readBookDetails, setReadBookDetails] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  // Fetch user data
   const fetchUserData = async () => {
     try {
       const userDocRef = doc(db, 'usuarios', auth.currentUser.uid);
@@ -32,7 +32,6 @@ const Perfil = () => {
     }
   };
 
-  // Fetch book details
   const fetchBooksDetails = async (bookIds, setBookDetails) => {
     if (bookIds.length === 0) return;
     try {
@@ -46,7 +45,6 @@ const Perfil = () => {
     }
   };
 
-  // Handle sign out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -56,19 +54,16 @@ const Perfil = () => {
     }
   };
 
-  // Handle book read status
   const handleRead = async (bookId) => {
     try {
       const userDocRef = doc(db, 'usuarios', auth.currentUser.uid);
 
       if (readBooks.includes(bookId)) {
-        // If already read, remove from read list
         await updateDoc(userDocRef, {
           readBooks: arrayRemove(bookId),
         });
         setReadBooks(prev => prev.filter(id => id !== bookId));
       } else {
-        // If not read, add to read list
         await updateDoc(userDocRef, {
           readBooks: arrayUnion(bookId),
           likedBooks: arrayRemove(bookId),
@@ -81,7 +76,6 @@ const Perfil = () => {
     }
   };
 
-  // Handle pull-to-refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchUserData();
@@ -91,20 +85,24 @@ const Perfil = () => {
   }, [likedBooks, readBooks]);
 
   useEffect(() => {
-    fetchUserData();
+    const fetchData = async () => {
+      await fetchUserData();
+      await fetchBooksDetails(likedBooks, setLikedBookDetails);
+      await fetchBooksDetails(readBooks, setReadBookDetails);
+      setLoading(false);
+    };
+    
+    fetchData();
+    
     navigation.setOptions({
       headerRight: () => (
-        <Button title="Cerrar sesión" onPress={handleSignOut} />
+        <TouchableOpacity style={styles.headerButton} onPress={handleSignOut}>
+        <Text style={styles.headerButtonText}>Cerrar sesión</Text>
+      </TouchableOpacity>
       ),
     });
-  }, [navigation]);
+  }, [navigation, likedBooks, readBooks]);
 
-  useEffect(() => {
-    fetchBooksDetails(likedBooks, setLikedBookDetails);
-    fetchBooksDetails(readBooks, setReadBookDetails);
-  }, [likedBooks, readBooks]);
-
-  // Render book item
   const renderBook = ({ item }) => (
     <View style={styles.bookContainer}>
       <Image source={{ uri: item.portadaURL }} style={styles.bookImage} />
@@ -125,7 +123,6 @@ const Perfil = () => {
     </View>
   );
 
-  // Prepare data for SectionList
   const sections = [
     {
       title: 'Libros que te gustan:',
@@ -139,19 +136,25 @@ const Perfil = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Bienvenido {userName}</Text>
-      <SectionList
-        sections={sections}
-        renderItem={renderBook}
-        renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.sectionHeader}>{title}</Text>
-        )}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        contentContainerStyle={styles.list}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+      ) : (
+        <>
+          <Text style={styles.welcomeText}>Bienvenido {userName}</Text>
+          <SectionList
+            sections={sections}
+            renderItem={renderBook}
+            renderSectionHeader={({ section: { title } }) => (
+              <Text style={styles.sectionHeader}>{title}</Text>
+            )}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            contentContainerStyle={styles.list}
+          />
+        </>
+      )}
     </View>
   );
 };
@@ -159,83 +162,103 @@ const Perfil = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: '#ffffff', // Fondo blanco para coherencia
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   welcomeText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontWeight: '600',
+    color: '#333333', // Color de texto estándar
     textAlign: 'center',
+    marginVertical: 16,
   },
   sectionHeader: {
-    fontSize: 20,
-    marginBottom: 10,
-    fontWeight: 'bold',
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#555555', // Color de texto para encabezados
+    backgroundColor: '#f8f8f8',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 8,
   },
   bookContainer: {
     flex: 1,
-    flexDirection: 'column', 
-    alignItems: 'center', 
-    marginBottom: 15, 
-    padding: 10, 
-    borderRadius: 10, 
-    backgroundColor: '#f8f8f8', 
-    elevation: 3, 
-    shadowColor: '#000', 
+    backgroundColor: '#f0f0f0',
+    padding: 16,
+    borderRadius: 8,
+    margin: 8,
+    alignItems: 'center',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    marginHorizontal: 5,
+    elevation: 2,
   },
   bookImage: {
     width: 120,
     height: 180,
-    borderRadius: 10, 
+    borderRadius: 8,
   },
   bookInfo: {
-    flexDirection: 'column',
-    flexShrink: 1,
-    marginTop: 10,
+    marginTop: 12,
+    alignItems: 'center',
   },
   bookTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#333333',
     textAlign: 'center',
-    marginTop: 5,
+    marginVertical: 4,
   },
   bookAuthor: {
     fontSize: 14,
-    color: '#666',
+    color: '#666666',
     textAlign: 'center',
-    marginBottom: 10,
   },
   bookDate: {
     fontSize: 14,
-    color: '#666',
+    color: '#666666',
     textAlign: 'center',
-    marginBottom: 10,
   },
   bookDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#666666',
     textAlign: 'center',
-    marginBottom: 10,
+    marginVertical: 8,
   },
   readButton: {
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    backgroundColor: '#4CAF50',
+    marginTop: 12,
+    backgroundColor: '#007BFF',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
   },
   readButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   list: {
-    width: '100%',
+    paddingBottom: 16,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerButton: {
+    marginRight: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+  },
+  headerButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
