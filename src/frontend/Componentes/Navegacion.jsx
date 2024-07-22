@@ -7,7 +7,7 @@ import Perfil from '../vistas/perfil';
 import Biblioteca from '../vistas/biblioteca';
 import AgregarLibro from '../vistas/agregarLibro';
 import SignIn from '../vistas/signIn';
-import RegisterScreen from '../vistas/registro';
+import Registro from '../vistas/registro';
 import Detalles from './detalles';
 import Edicion from './edicion';
 
@@ -94,9 +94,9 @@ function AppNavigator({ isSignedIn, onSignOut }) {
                 options={{ title: 'Agregar Libro' }}
             />
             <Stack.Screen
-                name="RegisterScreen"
-                component={RegisterScreen}
-                options={{ title: 'Registro' }}
+                name="Registro"
+                component={Registro}
+                options={{ title: 'Registro de usuario' }}
             />
             <Stack.Screen
             name="Detalles"
