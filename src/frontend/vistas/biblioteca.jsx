@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { collection, getDocs, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db, auth } from '../../../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
@@ -10,32 +10,36 @@ const Biblioteca = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [search, setSearch] = useState('');
   const [likedBooks, setLikedBooks] = useState(new Set());
+  const [refreshing, setRefreshing] = useState(false); // Estado para el pull to refresh
   const navigation = useNavigation();
 
+  const fetchBooks = async () => {
+    setRefreshing(true); // Indicar que estamos refrescando
+    try {
+      const querySnapshot = await getDocs(collection(db, 'Books'));
+      const booksData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setBooks(booksData);
+      setFilteredData(booksData);
+    } catch (error) {
+      console.error('Error fetching books: ', error);
+    } finally {
+      setRefreshing(false); // Terminar el refresco
+    }
+  };
+
+  const fetchLikedBooks = async () => {
+    try {
+      const userDocRef = doc(db, 'usuarios', auth.currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        setLikedBooks(new Set(userDoc.data().likedBooks || []));
+      }
+    } catch (error) {
+      console.error('Error fetching liked books: ', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'Books'));
-        const booksData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setBooks(booksData);
-        setFilteredData(booksData);
-      } catch (error) {
-        console.error('Error fetching books: ', error);
-      }
-    };
-
-    const fetchLikedBooks = async () => {
-      try {
-        const userDocRef = doc(db, 'usuarios', auth.currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setLikedBooks(new Set(userDoc.data().likedBooks || []));
-        }
-      } catch (error) {
-        console.error('Error fetching liked books: ', error);
-      }
-    };
-
     fetchBooks();
     fetchLikedBooks();
   }, []);
@@ -104,7 +108,10 @@ const Biblioteca = () => {
       </View>
     </View>
   );
-  
+
+  const onRefresh = () => {
+    fetchBooks();
+  };
 
   return (
     <View style={styles.container}>
@@ -132,6 +139,11 @@ const Biblioteca = () => {
           renderItem={renderBook}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListFooterComponent={
+            refreshing ? <ActivityIndicator size="large" color="#0000ff" /> : null
+          }
         />
       )}
     </View>
@@ -173,6 +185,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     width: '90%',
+    marginHorizontal: 20,
   },
   bookInfo: {
     flexDirection: 'column',

@@ -28,7 +28,7 @@ const Detalles = ({ route, navigation }) => {
     }, [bookId]);
 
     const handleEdit = () => {
-        navigation.navigate('EditBook', { bookId }); // Navegar a la pantalla de edición
+        navigation.navigate('Edicion', { bookId }); // Navegar a la pantalla de edición
     };
 
     const handleDelete = async () => {

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Button, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Button, Text, StyleSheet, SectionList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, collection, query, where, getDocs } from 'firebase/firestore';
@@ -13,51 +13,40 @@ const Perfil = () => {
   const [readBooks, setReadBooks] = useState([]);
   const [likedBookDetails, setLikedBookDetails] = useState([]);
   const [readBookDetails, setReadBookDetails] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userDocRef = doc(db, 'usuarios', auth.currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUserName(userData.nombre);
-          setLikedBooks(userData.likedBooks || []);
-          setReadBooks(userData.readBooks || []);
-        }
-      } catch (error) {
-        console.error('Error fetching user data: ', error);
+  // Fetch user data
+  const fetchUserData = async () => {
+    try {
+      const userDocRef = doc(db, 'usuarios', auth.currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserName(userData.nombre);
+        setLikedBooks(userData.likedBooks || []);
+        setReadBooks(userData.readBooks || []);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user data: ', error);
+    }
+  };
 
-    fetchUserData();
+  // Fetch book details
+  const fetchBooksDetails = async (bookIds, setBookDetails) => {
+    if (bookIds.length === 0) return;
+    try {
+      const booksCollection = collection(db, 'Books');
+      const q = query(booksCollection, where('__name__', 'in', bookIds));
+      const querySnapshot = await getDocs(q);
+      const booksData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setBookDetails(booksData);
+    } catch (error) {
+      console.error('Error fetching book details: ', error);
+    }
+  };
 
-    navigation.setOptions({
-      headerRight: () => (
-        <Button title="Cerrar sesión" onPress={handleSignOut} />
-      ),
-    });
-  }, [navigation]);
-
-  useEffect(() => {
-    const fetchBooksDetails = async (bookIds, setBookDetails) => {
-      if (bookIds.length === 0) return;
-      try {
-        const booksCollection = collection(db, 'Books');
-        const q = query(booksCollection, where('__name__', 'in', bookIds));
-        const querySnapshot = await getDocs(q);
-        const booksData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setBookDetails(booksData);
-      } catch (error) {
-        console.error('Error fetching book details: ', error);
-      }
-    };
-
-    fetchBooksDetails(likedBooks, setLikedBookDetails);
-    fetchBooksDetails(readBooks, setReadBookDetails);
-  }, [likedBooks, readBooks]);
-
+  // Handle sign out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -67,6 +56,7 @@ const Perfil = () => {
     }
   };
 
+  // Handle book read status
   const handleRead = async (bookId) => {
     try {
       const userDocRef = doc(db, 'usuarios', auth.currentUser.uid);
@@ -81,14 +71,40 @@ const Perfil = () => {
         // If not read, add to read list
         await updateDoc(userDocRef, {
           readBooks: arrayUnion(bookId),
+          likedBooks: arrayRemove(bookId),
         });
         setReadBooks(prev => [...prev, bookId]);
+        setLikedBooks(prev => prev.filter(id => id !== bookId));
       }
     } catch (error) {
       console.error('Error updating read status: ', error);
     }
   };
 
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchUserData();
+    await fetchBooksDetails(likedBooks, setLikedBookDetails);
+    await fetchBooksDetails(readBooks, setReadBookDetails);
+    setRefreshing(false);
+  }, [likedBooks, readBooks]);
+
+  useEffect(() => {
+    fetchUserData();
+    navigation.setOptions({
+      headerRight: () => (
+        <Button title="Cerrar sesión" onPress={handleSignOut} />
+      ),
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+    fetchBooksDetails(likedBooks, setLikedBookDetails);
+    fetchBooksDetails(readBooks, setReadBookDetails);
+  }, [likedBooks, readBooks]);
+
+  // Render book item
   const renderBook = ({ item }) => (
     <View style={styles.bookContainer}>
       <Image source={{ uri: item.portadaURL }} style={styles.bookImage} />
@@ -109,23 +125,31 @@ const Perfil = () => {
     </View>
   );
 
+  // Prepare data for SectionList
+  const sections = [
+    {
+      title: 'Libros que te gustan:',
+      data: likedBookDetails
+    },
+    {
+      title: 'Mis libros leídos:',
+      data: readBookDetails
+    }
+  ];
+
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Bienvenido {userName}</Text>
-      <Text style={styles.likedBooksTitle}>Libros que te gustan:</Text>
-      <FlatList
-        data={likedBookDetails}
+      <SectionList
+        sections={sections}
         renderItem={renderBook}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.sectionHeader}>{title}</Text>
+        )}
         keyExtractor={(item) => item.id}
         numColumns={2}
-        contentContainerStyle={styles.list}
-      />
-      <Text style={styles.readBooksTitle}>Mis libros leídos:</Text>
-      <FlatList
-        data={readBookDetails}
-        renderItem={renderBook}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         contentContainerStyle={styles.list}
       />
     </View>
@@ -143,14 +167,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  likedBooksTitle: {
+  sectionHeader: {
     fontSize: 20,
     marginBottom: 10,
-  },
-  readBooksTitle: {
-    fontSize: 20,
-    marginTop: 20,
-    marginBottom: 10,
+    fontWeight: 'bold',
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
   bookContainer: {
     flex: 1,
