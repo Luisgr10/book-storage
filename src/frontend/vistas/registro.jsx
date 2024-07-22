@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { auth, db } from "../../../firebaseConfig"; // Asegúrate de importar auth y db
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   TextInput,
@@ -8,10 +12,6 @@ import {
   Text,
   Image,
 } from "react-native";
-import { auth, db } from "../../../firebaseConfig"; // Asegúrate de importar auth y db
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { useNavigation } from "@react-navigation/native";
 
 const Registro = () => {
   const [email, setEmail] = useState("");
