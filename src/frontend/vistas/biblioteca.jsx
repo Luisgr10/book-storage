@@ -85,17 +85,26 @@ const Biblioteca = () => {
       <View style={styles.bookInfo}>
         <Text style={styles.bookTitle}>{item.titulo}</Text>
         <Text style={styles.bookAuthor}>{item.autor.join(', ')}</Text>
-        <TouchableOpacity
-          style={styles.likeButton}
-          onPress={() => handleLike(item.id)}
-        >
-          <Text style={styles.likeButtonText}>
-            {likedBooks.has(item.id) ? <AntDesign name="heart" size={20} color="red" /> : <AntDesign name="hearto" size={20} color="black" />}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.infoButton}
+            onPress={() => navigation.navigate('Detalles', { bookId: item.id })}
+          >
+            <Text style={styles.infoButtonText}>Más Información</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.likeButton}
+            onPress={() => handleLike(item.id)}
+          >
+            <Text style={styles.likeButtonText}>
+              {likedBooks.has(item.id) ? <AntDesign name="heart" size={20} color="red" /> : <AntDesign name="hearto" size={20} color="black" />}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
+  
 
   return (
     <View style={styles.container}>
@@ -218,6 +227,24 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 16,
     color: 'white',
+    fontWeight: 'bold',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  infoButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoButtonText: {
+    color: 'white',
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });

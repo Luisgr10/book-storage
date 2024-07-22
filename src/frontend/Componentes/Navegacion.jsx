@@ -8,6 +8,7 @@ import Biblioteca from '../vistas/biblioteca';
 import AgregarLibro from '../vistas/agregarLibro';
 import SignIn from '../vistas/signIn';
 import RegisterScreen from '../vistas/registro';
+import Detalles from './detalles';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -95,6 +96,11 @@ function AppNavigator({ isSignedIn, onSignOut }) {
                 name="RegisterScreen"
                 component={RegisterScreen}
                 options={{ title: 'Registro' }}
+            />
+            <Stack.Screen
+            name="Detalles"
+            component={Detalles}
+            options={{ title: 'Información del Libro'}}
             />
         </Stack.Navigator>
     );

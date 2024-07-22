@@ -19,7 +19,7 @@ router.get('/books', async (req, res) => {
     }
 });
 
-// GET /books/:id
+// GET /book/:id
 router.get('/book/:id', async (req, res) => {
     const bookId = req.params.id;
     
@@ -74,8 +74,8 @@ router.put('/book/:id', async (req, res) => {
     }
 });
 
-// DELETE /books/:id
-router.delete('/:id', async (req, res) => {
+// DELETE /book/:id
+router.delete('/book/:id', async (req, res) => {
     const bookId = req.params.id;
 
     try {
