@@ -1,5 +1,9 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+#firebase
+.env
+firebase.json
+
 # dependencies
 node_modules/
 
@@ -31,7 +35,3 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-#firebase
-.env
-firebase.json
-firebaseConfig.js
