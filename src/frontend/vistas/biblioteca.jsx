@@ -21,6 +21,7 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Biblioteca = () => {
   const [books, setBooks] = useState([]);
@@ -96,40 +97,45 @@ const Biblioteca = () => {
     }
   };
 
-  const renderBook = useCallback(({ item }) => (
-    <View style={styles.bookContainer}>
-      <Image source={{ uri: item.portadaURL }} style={styles.bookImage} />
-      <View style={styles.bookInfo}>
-        <Text style={styles.bookTitle}>{item.titulo}</Text>
-        <Text style={styles.bookAuthor}>{item.autor.join(", ")}</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.infoButton}
-            onPress={() => navigation.navigate("Detalles", { bookId: item.id })}
-          >
-            <Text style={styles.infoButtonText}>Más Información</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.likeButton}
-            onPress={() => handleLike(item.id)}
-          >
-            {likedBooks.has(item.id) ? (
-              <AntDesign name="heart" size={20} color="red" />
-            ) : (
-              <AntDesign name="hearto" size={20} color="#333" />
-            )}
-          </TouchableOpacity>
+  const renderBook = useCallback(
+    ({ item }) => (
+      <View style={styles.bookContainer}>
+        <Image source={{ uri: item.portadaURL }} style={styles.bookImage} />
+        <View style={styles.bookInfo}>
+          <Text style={styles.bookTitle}>{item.titulo}</Text>
+          <Text style={styles.bookAuthor}>{item.autor.join(", ")}</Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.infoButton}
+              onPress={() =>
+                navigation.navigate("Detalles", { bookId: item.id })
+              }
+            >
+              <Text style={styles.infoButtonText}>Más Información</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.likeButton}
+              onPress={() => handleLike(item.id)}
+            >
+              {likedBooks.has(item.id) ? (
+                <AntDesign name="heart" size={20} color="red" />
+              ) : (
+                <AntDesign name="hearto" size={20} color="#333" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
-  ), [likedBooks, navigation]);
+    ),
+    [likedBooks, navigation]
+  );
 
   const onRefresh = () => {
     fetchBooks();
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchBar}
@@ -153,7 +159,6 @@ const Biblioteca = () => {
           data={filteredData}
           renderItem={renderBook}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
           refreshing={refreshing}
           onRefresh={onRefresh}
           ListFooterComponent={
@@ -163,7 +168,7 @@ const Biblioteca = () => {
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -173,6 +178,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     alignItems: "center",
     paddingTop: 20,
+    
   },
   searchContainer: {
     flexDirection: "row",
@@ -193,8 +199,9 @@ const styles = StyleSheet.create({
   bookContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: 'center',
     marginBottom: 15,
-    padding: 10,
+    padding: 20,
     borderRadius: 10,
     backgroundColor: "#fff",
     elevation: 4,
@@ -203,6 +210,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     width: "90%",
+    marginHorizontal: 20,
   },
   bookImage: {
     width: 100,
@@ -210,7 +218,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   bookInfo: {
-    flex: 1,
+    flexShrink:1,
     marginLeft: 15,
   },
   bookTitle: {
@@ -225,8 +233,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonContainer: {
+    flexShrink: 1,
     flexDirection: "row",
-    justifyContent: "space-around",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   infoButton: {
     backgroundColor: "#007bff",
@@ -261,9 +271,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
     fontWeight: "bold",
-  },
-  list: {
-    paddingHorizontal: 20,
   },
 });
 

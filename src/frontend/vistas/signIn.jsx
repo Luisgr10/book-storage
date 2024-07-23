@@ -86,7 +86,7 @@ const SignIn = () => {
         <View style={styles.registerContainer}>
           <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate("RegisterScreen")}
+            onPress={() => navigation.navigate("Registro")}
           >
             <Text style={styles.registerLink}>Regístrate aquí</Text>
           </TouchableOpacity>
